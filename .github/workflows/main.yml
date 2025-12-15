@@ -27,6 +27,6 @@ jobs:
             npm run build
             # npx prisma migrate deploy
             # npx prisma generate
-            pm2 stop test_rvc_api_4011
-            pm2 start test_rvc_api_4011
-            pm2 save
+            # pm2 stop test_rvc_api_4011
+            # pm2 start test_rvc_api_4011
+            # pm2 save
