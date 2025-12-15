@@ -59,7 +59,6 @@ export class AuthController {
   @Version('1')
   @UseGuards(JwtAuthGuard)
   async update(@Req() req: Request, @Body() updateAuthDto: UpdateAuthDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const data = await this.authService.update(req.user.id, updateAuthDto);
     return data;
   }
