@@ -13,7 +13,8 @@ model users {
   email        String   @unique
   name         String
   avatar       String?
-  passwordHash String
+  password     String
+  raw_password String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

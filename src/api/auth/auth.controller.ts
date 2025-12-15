@@ -6,37 +6,61 @@ import {
   Patch,
   Param,
   Delete,
+  Version,
+  Req,
+  UseGuards,
+  Put,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { SignupAuthDto } from './dto/signup-auth.dto';
+import { LoginAuthDto } from './dto/login-auth.dto';
+import { LocalAuthGuard } from './local-auth.guard';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('signup')
+  @Version('1')
+  async signup(@Body() signupAuthDto: SignupAuthDto) {
+    const data = await this.authService.signup(signupAuthDto);
+    return data;
+  }
+
+  @Post('login')
+  @Version('1')
+  @UseGuards(LocalAuthGuard)
+  async login(@Req() req: Request, @Body() loginAuthDto: LoginAuthDto) {
+    console.log('|||||||||||||||| Login payload: ', loginAuthDto);
+    const data = await this.authService.login(req.user);
+    return data;
   }
 
   @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  async findAll() {
+    const data = await this.authService.findAll();
+    return data;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id') id: string) {
+    const data = await this.authService.findOne({ id: Number(id) });
+    return data;
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Put()
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  async update(@Req() req: Request, @Body() updateAuthDto: UpdateAuthDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const data = await this.authService.update(req.user.id, updateAuthDto);
+    return data;
   }
 }
