@@ -1,0 +1,57 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model users {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  avatar       String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations to Message model
+  messagesSent     messages[] @relation("messagesSent")
+  messagesReceived messages[] @relation("messagesReceived")
+}
+
+model messages {
+  id          Int      @id @default(autoincrement())
+  content     String
+  roomId      String
+  senderId    Int
+  receiverId  Int
+  fileUrl     String?  @db.Text
+  fileName    String?
+  fileSize    Int?
+  fileMime    String?
+  replyToId   Int?
+  reactions   Json?    @db.Json
+  attachments Json?    @db.Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // --------------------------------------------------------------------------------
+  // ⭐ INDEXES
+  // --------------------------------------------------------------------------------
+  // Relations to User model
+  sender   users @relation("messagesSent", fields: [senderId], references: [id])
+  receiver users @relation("messagesReceived", fields: [receiverId], references: [id])
+
+  // Self-Relation for replies:
+  // 1. replyTo: The parent message this message is replying to (the "one" side)
+  replyTo messages? @relation("ReplyTo", fields: [replyToId], references: [id])
+
+  // 2. replies: The list of messages that are replying to this message (the "many" side)
+  replies messages[] @relation("ReplyTo")
+
+  // Compound index for efficient message retrieval in a room, sorted by time
+  @@index([roomId, createdAt])
+}
