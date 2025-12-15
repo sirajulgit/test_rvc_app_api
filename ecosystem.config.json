@@ -3,7 +3,7 @@
     {
       "name": "test_rvc_api_4011",
       "script": "npm",
-      "args": "start",
+      "args": "start:prod",
       "env": {
         "PORT": 4011,
         "NODE_ENV": "production"
